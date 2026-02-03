@@ -1,4 +1,4 @@
-import * as Notifications from "expo-notifications";
+import notifee, { AndroidImportance } from "@notifee/react-native";
 import Toast from "react-native-toast-message";
 import { create } from "zustand";
 
@@ -41,13 +41,29 @@ export const useProductStore = create<ProductState>((set, get) => ({
     });
 
     if (updatedProducts.length === 5) {
-      await Notifications.scheduleNotificationAsync({
-        content: {
+      try {
+        // Create a channel (required for Android)
+        const channelId = await notifee.createChannel({
+          id: "default",
+          name: "Default Channel",
+          importance: AndroidImportance.HIGH,
+        });
+
+        // Display a notification
+        await notifee.displayNotification({
           title: "Product Limit Reached",
           body: "You have uploaded the maximum of 5 products.",
-        },
-        trigger: null, // immediate
-      });
+          android: {
+            channelId,
+            importance: AndroidImportance.HIGH,
+            pressAction: {
+              id: "default",
+            },
+          },
+        });
+      } catch (error) {
+        console.error("Failed to show notification:", error);
+      }
     }
   },
   resetProducts: () => set({ products: [] }),

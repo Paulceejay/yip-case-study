@@ -6,7 +6,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React from "react";
 import { FlatList, TouchableOpacity, View } from "react-native";
-import { RenderProductItem } from "./RenderProductItem";
+import { RenderProductItem } from "../Shared/RenderProductItem";
 
 const COLUMN_WIDTH = (DEVICE_WIDTH - 48) / 2;
 
@@ -17,11 +17,14 @@ export const HomeScreenIndex = () => {
   const limit = 5;
   const progress = productCount / limit;
 
+  // Limit items shown on Home Screen
+  const displayedProducts = products.slice(0, 3);
+
   return (
     <ScreenWrapper coverStatusBar>
       <View className="flex-1 bg-backgroundBase">
         <FlatList
-          data={products}
+          data={displayedProducts}
           keyExtractor={(item) => item.id}
           numColumns={2}
           contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
@@ -67,14 +70,18 @@ export const HomeScreenIndex = () => {
                     Active Inventory
                   </AppText>
                   <AppText className="text-xs text-gray-400">
-                    Managing {productCount} Items
+                    Showing {displayedProducts.length} of {productCount} Items
                   </AppText>
                 </View>
-                <TouchableOpacity>
-                  <AppText className="text-primaryColor custom-font-bold text-[10px] uppercase tracking-wider">
-                    Sort By
-                  </AppText>
-                </TouchableOpacity>
+                {productCount > 0 && (
+                  <TouchableOpacity
+                    onPress={() => router.push("/home/all-products")}
+                  >
+                    <AppText className="text-primaryColor custom-font-bold text-[10px] uppercase tracking-wider">
+                      View All
+                    </AppText>
+                  </TouchableOpacity>
+                )}
               </View>
             </View>
           }
