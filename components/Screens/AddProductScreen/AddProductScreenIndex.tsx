@@ -6,14 +6,7 @@ import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import {
-  Alert,
-  Image,
-  ScrollView,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Image, ScrollView, TextInput, View } from "react-native";
 
 export const AddProductScreenIndex = () => {
   const router = useRouter();
@@ -22,6 +15,8 @@ export const AddProductScreenIndex = () => {
   const [price, setPrice] = useState("");
   const [image, setImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -33,17 +28,23 @@ export const AddProductScreenIndex = () => {
 
     if (!result.canceled) {
       setImage(result.assets[0].uri);
+      setErrorMessage(null);
     }
   };
 
   const handleAddProduct = async () => {
+    setErrorMessage(null);
+    setSuccessMessage(null);
+
     if (!name || !price || !image) {
-      Alert.alert("Error", "Please fill in all fields and select a photo.");
+      setErrorMessage("Please fill in all fields and select a photo.");
+      setTimeout(() => setErrorMessage(null), 3000);
       return;
     }
 
     if (products.length >= 5) {
-      Alert.alert("Limit Reached", "You can only upload up to 5 products.");
+      setErrorMessage("Limit Reached: You can only upload up to 5 products.");
+      setTimeout(() => setErrorMessage(null), 3000);
       return;
     }
 
@@ -55,20 +56,26 @@ export const AddProductScreenIndex = () => {
         photoUri: image,
       });
 
-      Alert.alert("Success", "Product added successfully!");
+      setSuccessMessage("Product added successfully!");
       setName("");
       setPrice("");
       setImage(null);
-      router.push("/home");
+
+      // Navigate back after a short delay to show success message
+      setTimeout(() => {
+        router.push("/home");
+        setSuccessMessage(null);
+      }, 1500);
     } catch (error) {
-      Alert.alert("Error", "Failed to add product.");
+      setErrorMessage("Failed to add product. Please try again.");
+      setTimeout(() => setErrorMessage(null), 3000);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <ScreenWrapper coverStatusBar>
+    <ScreenWrapper coverStatusBar={false}>
       <View className="flex-1 bg-white">
         {/* Header */}
         <View className="flex-row items-center justify-between px-5 py-4 border-b border-gray-50">
@@ -76,20 +83,37 @@ export const AddProductScreenIndex = () => {
           <AppText className="text-base custom-font-bold text-textPrimary">
             Add New Product
           </AppText>
-          <TouchableOpacity onPress={() => router.back()}>
+          <AppButton onPress={() => router.back()} className="p-1" smSize>
             <Ionicons name="close" size={24} color="#6C7580" />
-          </TouchableOpacity>
+          </AppButton>
         </View>
 
         <ScrollView
           className="flex-1 px-5"
           showsVerticalScrollIndicator={false}
         >
+          {/* Error/Success Messages */}
+          {errorMessage && (
+            <View className="mt-4 p-4 bg-red-50 rounded-xl border border-red-100">
+              <AppText className="text-red-500 text-sm custom-font-bold text-center">
+                {errorMessage}
+              </AppText>
+            </View>
+          )}
+
+          {successMessage && (
+            <View className="mt-4 p-4 bg-green-50 rounded-xl border border-green-100">
+              <AppText className="text-green-600 text-sm custom-font-bold text-center">
+                {successMessage}
+              </AppText>
+            </View>
+          )}
+
           {/* Image Picker */}
           <View className="items-center justify-center my-8">
-            <TouchableOpacity
+            <AppButton
               onPress={pickImage}
-              className="w-full aspect-square bg-[#F3F4F6] rounded-[32px] overflow-hidden border border-dashed border-gray-300 items-center justify-center"
+              className="w-full aspect-square bg-[#F3F4F6] rounded-[32px] overflow-hidden border border-dashed border-gray-300 items-center justify-center p-0"
             >
               {image ? (
                 <Image source={{ uri: image }} className="w-full h-full" />
@@ -103,7 +127,7 @@ export const AddProductScreenIndex = () => {
                   </AppText>
                 </View>
               )}
-            </TouchableOpacity>
+            </AppButton>
           </View>
 
           {/* Form Fields */}
@@ -116,35 +140,29 @@ export const AddProductScreenIndex = () => {
                 className="bg-white border border-gray-100 rounded-xl p-4 text-textPrimary custom-font-medium"
                 placeholder="e.g., Handmade Ceramic Mug"
                 value={name}
-                onChangeText={setName}
+                onChangeText={(text) => {
+                  setName(text);
+                  setErrorMessage(null);
+                }}
                 placeholderTextColor="#D1D5DB"
               />
             </View>
 
-            <View>
+            <View className="mt-4">
               <AppText className="text-xs custom-font-bold text-gray-500 uppercase tracking-widest mb-2">
-                Price ($)
+                Price (#)
               </AppText>
               <TextInput
                 className="bg-white border border-gray-100 rounded-xl p-4 text-textPrimary custom-font-medium"
-                placeholder="$ 0.00"
+                placeholder="# 0.00"
                 value={price}
-                onChangeText={setPrice}
+                onChangeText={(text) => {
+                  setPrice(text);
+                  setErrorMessage(null);
+                }}
                 keyboardType="numeric"
                 placeholderTextColor="#D1D5DB"
               />
-            </View>
-
-            <View>
-              <AppText className="text-xs custom-font-bold text-gray-500 uppercase tracking-widest mb-2">
-                Category
-              </AppText>
-              <TouchableOpacity className="flex-row items-center justify-between bg-white border border-gray-100 rounded-xl p-4">
-                <AppText className="text-gray-400 custom-font-medium">
-                  Select a category
-                </AppText>
-                <Ionicons name="chevron-down" size={20} color="#D1D5DB" />
-              </TouchableOpacity>
             </View>
           </View>
 
@@ -153,7 +171,7 @@ export const AddProductScreenIndex = () => {
             <AppButton
               onPress={handleAddProduct}
               isLoading={loading}
-              disabled={products.length >= 5}
+              disabled={products.length >= 5 && !successMessage}
               className="bg-primaryColor rounded-xl h-[56px]"
             >
               <AppText className="text-white custom-font-bold">
@@ -161,14 +179,14 @@ export const AddProductScreenIndex = () => {
               </AppText>
             </AppButton>
 
-            <TouchableOpacity
+            <AppButton
               onPress={() => router.back()}
-              className="bg-gray-50 rounded-xl h-[56px] items-center justify-center"
+              className="bg-gray-50 rounded-xl h-[56px] items-center justify-center mt-3"
             >
               <AppText className="text-textPrimary custom-font-bold">
                 Cancel
               </AppText>
-            </TouchableOpacity>
+            </AppButton>
           </View>
         </ScrollView>
       </View>

@@ -34,12 +34,6 @@ export const useProductStore = create<ProductState>((set, get) => ({
     ];
     set({ products: updatedProducts });
 
-    Toast.show({
-      type: "successToast",
-      text1: "Product Added",
-      text2: `${newProduct.name} saved successfully.`,
-    });
-
     if (updatedProducts.length === 5) {
       try {
         // Create a channel (required for Android)

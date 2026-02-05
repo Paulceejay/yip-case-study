@@ -1,5 +1,5 @@
-import { AppNotificationToast } from "@/components/Global/AppNotificationToast";
 import { useAppNotifications } from "@/base/hooks/pushNotifications/useAppNotifications";
+import { AppNotificationToast } from "@/components/Global/AppNotificationToast";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import React, { useEffect } from "react";
@@ -23,7 +23,9 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="index" />
+        <Stack.Screen name="home" />
+        <Stack.Screen name="add-product" />
       </Stack>
       <AppNotificationToast />
     </GestureHandlerRootView>
