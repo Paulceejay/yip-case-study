@@ -6,7 +6,14 @@ import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { Image, ScrollView, TextInput, View } from "react-native";
+import {
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  TextInput,
+  View,
+} from "react-native";
 
 export const AddProductScreenIndex = () => {
   const router = useRouter();
@@ -20,7 +27,7 @@ export const AddProductScreenIndex = () => {
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ["images"],
       allowsEditing: true,
       aspect: [1, 1],
       quality: 1,
@@ -76,7 +83,11 @@ export const AddProductScreenIndex = () => {
 
   return (
     <ScreenWrapper coverStatusBar={false}>
-      <View className="flex-1 bg-white">
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0}
+        style={{ flex: 1 }}
+      >
         {/* Header */}
         <View className="flex-row items-center justify-between px-5 py-4 border-b border-gray-50">
           <View className="w-8" />
@@ -91,6 +102,7 @@ export const AddProductScreenIndex = () => {
         <ScrollView
           className="flex-1 px-5"
           showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ flexGrow: 1 }}
         >
           {/* Error/Success Messages */}
           {errorMessage && (
@@ -189,7 +201,7 @@ export const AddProductScreenIndex = () => {
             </AppButton>
           </View>
         </ScrollView>
-      </View>
+      </KeyboardAvoidingView>
     </ScreenWrapper>
   );
 };
